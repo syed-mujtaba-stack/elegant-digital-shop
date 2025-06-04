@@ -6,20 +6,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ShoppingCart, Star, Search } from 'lucide-react';
+import { ShoppingCart, Star, Search, Heart } from 'lucide-react';
 import { products, categories } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { toast } from '@/hooks/use-toast';
 
 const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const filteredProducts = products
     .filter(product => 
       (selectedCategory === 'All' || product.category === selectedCategory) &&
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      product.price >= priceRange.min && product.price <= priceRange.max
     )
     .sort((a, b) => {
       switch (sortBy) {
@@ -41,15 +46,40 @@ const Products = () => {
       price: product.price,
       image: product.image
     });
+    toast({
+      title: "Added to cart!",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
+  const handleWishlistToggle = (product: any) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      toast({
+        title: "Removed from wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      });
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image
+      });
+      toast({
+        title: "Added to wishlist!",
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Our Products</h1>
-          <p className="text-lg text-gray-600">Discover our premium collection of carefully curated products</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Products</h1>
+          <p className="text-lg text-gray-600 dark:text-gray-300">Discover our premium collection of carefully curated products</p>
         </div>
 
         {/* Filters */}
@@ -77,6 +107,25 @@ const Products = () => {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Price Range */}
+            <div className="flex gap-2 items-center">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={priceRange.min}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) }))}
+                className="w-20"
+              />
+              <span className="text-gray-500">-</span>
+              <Input
+                type="number"
+                placeholder="Max"
+                value={priceRange.max}
+                onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) }))}
+                className="w-20"
+              />
+            </div>
           </div>
 
           {/* Sort */}
@@ -95,7 +144,7 @@ const Products = () => {
 
         {/* Results Count */}
         <div className="mb-6">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             Showing {filteredProducts.length} of {products.length} products
           </p>
         </div>
@@ -115,19 +164,33 @@ const Products = () => {
                 ) : (
                   <Badge className="absolute top-3 left-3 bg-red-600">Out of Stock</Badge>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white"
+                  onClick={() => handleWishlistToggle(product)}
+                >
+                  <Heart 
+                    className={`h-4 w-4 ${
+                      isInWishlist(product.id) 
+                        ? 'text-red-500 fill-red-500' 
+                        : 'text-gray-600'
+                    }`} 
+                  />
+                </Button>
               </div>
               <CardContent className="p-4">
                 <div className="flex items-center gap-1 mb-2">
                   <div className="flex items-center">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm text-gray-600 ml-1">{product.rating}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 ml-1">{product.rating}</span>
                   </div>
                   <span className="text-sm text-gray-400">({product.reviews})</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{product.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{product.description}</p>
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-blue-600">${product.price}</span>
+                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.price}</span>
                   <div className="flex gap-2">
                     <Link to={`/products/${product.id}`}>
                       <Button variant="outline" size="sm">View</Button>
@@ -150,9 +213,13 @@ const Products = () => {
         {/* No Results */}
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-4">Try adjusting your search or filter criteria</p>
-            <Button onClick={() => { setSearchTerm(''); setSelectedCategory('All'); }}>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No products found</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Try adjusting your search or filter criteria</p>
+            <Button onClick={() => { 
+              setSearchTerm(''); 
+              setSelectedCategory('All'); 
+              setPriceRange({ min: 0, max: 1000 });
+            }}>
               Clear Filters
             </Button>
           </div>

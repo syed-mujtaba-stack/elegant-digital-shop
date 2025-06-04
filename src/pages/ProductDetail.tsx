@@ -1,19 +1,21 @@
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Star, ArrowLeft, Check } from 'lucide-react';
+import { ShoppingCart, Star, ArrowLeft, Check, Heart } from 'lucide-react';
 import { products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from '@/hooks/use-toast';
+import ProductReviews from '@/components/ProductReviews';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -38,6 +40,31 @@ const ProductDetail = () => {
       image: product.image,
       quantity
     });
+    toast({
+      title: "Added to cart!",
+      description: `${product.name} has been added to your cart.`,
+    });
+  };
+
+  const handleWishlistToggle = () => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      toast({
+        title: "Removed from wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      });
+    } else {
+      addToWishlist({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image
+      });
+      toast({
+        title: "Added to wishlist!",
+        description: `${product.name} has been added to your wishlist.`,
+      });
+    }
   };
 
   const handleBuyNow = () => {
@@ -46,7 +73,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
@@ -58,7 +85,7 @@ const ProductDetail = () => {
           Back to Products
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
@@ -98,7 +125,7 @@ const ProductDetail = () => {
                   <Badge variant="destructive">Out of Stock</Badge>
                 )}
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
               
               {/* Rating */}
               <div className="flex items-center gap-2 mb-4">
@@ -118,7 +145,7 @@ const ProductDetail = () => {
                 <span className="text-gray-500">({product.reviews} reviews)</span>
               </div>
 
-              <p className="text-3xl font-bold text-blue-600 mb-6">${product.price}</p>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">${product.price}</p>
             </div>
 
             <Separator />
@@ -174,6 +201,19 @@ const ProductDetail = () => {
                   Add to Cart
                 </Button>
                 <Button
+                  onClick={handleWishlistToggle}
+                  variant="outline"
+                  className="px-4"
+                >
+                  <Heart 
+                    className={`h-4 w-4 ${
+                      isInWishlist(product.id) 
+                        ? 'text-red-500 fill-red-500' 
+                        : 'text-gray-600'
+                    }`} 
+                  />
+                </Button>
+                <Button
                   onClick={handleBuyNow}
                   disabled={!product.inStock}
                   variant="outline"
@@ -184,6 +224,11 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Product Reviews */}
+        <div className="mb-16">
+          <ProductReviews productId={product.id} />
         </div>
 
         {/* Related Products */}

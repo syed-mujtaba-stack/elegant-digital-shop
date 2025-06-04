@@ -23,8 +23,43 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white">
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
+        
+        {/* Hero Background Images */}
+        <div className="absolute inset-0 opacity-20">
+          <img
+            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1920&h=1080&fit=crop"
+            alt="Modern workspace"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        
+        {/* Floating Product Images */}
+        <div className="absolute top-10 right-10 opacity-30 animate-bounce">
+          <img
+            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop"
+            alt="Headphones"
+            className="w-32 h-32 rounded-full shadow-2xl"
+          />
+        </div>
+        
+        <div className="absolute bottom-20 left-10 opacity-30 animate-pulse">
+          <img
+            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop"
+            alt="Smart watch"
+            className="w-24 h-24 rounded-full shadow-2xl"
+          />
+        </div>
+        
+        <div className="absolute top-1/2 right-1/4 opacity-20 animate-float">
+          <img
+            src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200&h=200&fit=crop"
+            alt="Leather bag"
+            className="w-28 h-28 rounded-full shadow-2xl"
+          />
+        </div>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center space-y-8">
             <h1 className="text-4xl md:text-6xl font-bold leading-tight">
@@ -50,6 +85,27 @@ const Index = () => {
                 </Button>
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* Hero Section Bottom Images */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-50 to-transparent">
+          <div className="flex justify-center items-end space-x-8 h-full pb-4 opacity-60">
+            <img
+              src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=100&h=100&fit=crop"
+              alt="Sunglasses"
+              className="w-16 h-16 rounded-lg shadow-lg"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=100&h=100&fit=crop"
+              alt="Keyboard"
+              className="w-20 h-20 rounded-lg shadow-lg"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=100&h=100&fit=crop"
+              alt="Camera lens"
+              className="w-16 h-16 rounded-lg shadow-lg"
+            />
           </div>
         </div>
       </section>

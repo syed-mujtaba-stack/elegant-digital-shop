@@ -2,19 +2,19 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Heart, User, Menu, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, Heart, Menu, Sun, Moon } from 'lucide-react'; // Removed User icon as UserButton handles it
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/clerk-react';
 import SearchSuggestions from './SearchSuggestions';
 import { useState } from 'react';
 
 const Navbar = () => {
   const { state: cartState } = useCart();
   const { state: wishlistState } = useWishlist();
-  const { isAuthenticated, user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  // const { isSignedIn } = useAuth(); // We can use SignedIn/SignedOut components directly
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -80,7 +80,7 @@ const Navbar = () => {
           </div>
 
           {/* Right side icons */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3">
             {/* Theme Toggle */}
             <Button
               variant="ghost"
@@ -119,20 +119,11 @@ const Navbar = () => {
               </Button>
             </Link>
 
-            {/* User Menu */}
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <Link to="/profile">
-                  <Button variant="ghost" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    {user?.name || 'Profile'}
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={logout}>
-                  Logout
-                </Button>
-              </div>
-            ) : (
+            {/* User Menu - Clerk Handled */}
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            <SignedOut>
               <div className="flex items-center space-x-2">
                 <Link to="/login">
                   <Button variant="ghost" size="sm">Login</Button>
@@ -141,7 +132,7 @@ const Navbar = () => {
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Register</Button>
                 </Link>
               </div>
-            )}
+            </SignedOut>
 
             {/* Mobile menu button */}
             <Button

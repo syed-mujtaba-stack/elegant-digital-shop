@@ -87,7 +87,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       {/* Reviews Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <span>Customer Reviews</span>
             <div className="flex items-center gap-2">
               {renderStars(Math.round(averageRating))}
@@ -141,7 +141,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   <User className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between mb-2">
                     <div>
                       <p className="font-semibold">{review.userName}</p>
                       <p className="text-sm text-gray-500">{review.date}</p>

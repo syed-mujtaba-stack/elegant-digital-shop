@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ShoppingCart, Star, Search, Heart } from 'lucide-react';
-import { products, categories } from '@/data/products';
+import { ShoppingCart, Star, Search, Heart, Eye } from 'lucide-react';
+import { products, categories, Product } from '@/data/products';
+import { ProductQuickViewModal } from '@/components/ProductQuickViewModal';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from '@/hooks/use-toast';
@@ -19,6 +21,10 @@ const Products = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+
+  const [selectedProductForQuickView, setSelectedProductForQuickView] = useState<Product | null>(null);
+  const [isQuickViewModalOpen, setIsQuickViewModalOpen] = useState(false);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
 
   const filteredProducts = products
     .filter(product => 
@@ -39,7 +45,7 @@ const Products = () => {
       }
     });
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addItem({
       id: product.id,
       name: product.name,
@@ -71,6 +77,62 @@ const Products = () => {
         description: `${product.name} has been added to your wishlist.`,
       });
     }
+  };
+
+  const handleProductSelectToggle = (productId: number, checked: boolean) => {
+    setSelectedProductIds(prevSelectedIds => {
+      const newSelectedIds = new Set(prevSelectedIds);
+      if (checked) {
+        newSelectedIds.add(productId);
+      } else {
+        newSelectedIds.delete(productId);
+      }
+      return newSelectedIds;
+    });
+  };
+
+  const handleBulkAddToCart = () => {
+    if (selectedProductIds.size === 0) {
+      toast({
+        title: "No products selected",
+        description: "Please select products to add to cart.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    let itemsAddedCount = 0;
+    selectedProductIds.forEach(productId => {
+      const productToAdd = products.find(p => p.id === productId);
+      if (productToAdd && productToAdd.inStock) {
+        addItem({
+          id: productToAdd.id,
+          name: productToAdd.name,
+          price: productToAdd.price,
+          image: productToAdd.image
+        });
+        itemsAddedCount++;
+      }
+    });
+
+    if (itemsAddedCount > 0) {
+      toast({
+        title: "Products added to cart!",
+        description: `${itemsAddedCount} product${itemsAddedCount > 1 ? 's' : ''} added to your cart.`,
+      });
+    } else if (selectedProductIds.size > 0 && itemsAddedCount === 0) {
+        toast({
+            title: "Selected products out of stock",
+            description: "None of the selected products could be added as they are out of stock.",
+            variant: "destructive",
+        });
+    }
+    setSelectedProductIds(new Set()); // Clear selection
+  };
+
+  const handleOpenQuickView = (product: Product) => {
+    setSelectedProductForQuickView(product);
+    setIsQuickViewModalOpen(true);
   };
 
   return (
@@ -142,6 +204,22 @@ const Products = () => {
           </Select>
         </div>
 
+        {/* Bulk Actions & Results Count */}
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-600 dark:text-gray-300 mb-2 sm:mb-0">
+            Showing {filteredProducts.length} of {products.length} products
+          </p>
+          {selectedProductIds.size > 0 && (
+            <Button 
+              onClick={handleBulkAddToCart}
+              disabled={selectedProductIds.size === 0}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Add Selected to Cart ({selectedProductIds.size})
+            </Button>
+          )}
+        </div>
+
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-600 dark:text-gray-300">
@@ -154,15 +232,23 @@ const Products = () => {
           {filteredProducts.map((product) => (
             <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
               <div className="relative overflow-hidden">
+                <div className="absolute top-3 left-3 z-10 bg-white/80 p-1 rounded-sm">
+                  <Checkbox 
+                    id={`select-${product.id}`}
+                    checked={selectedProductIds.has(product.id)}
+                    onCheckedChange={(checked) => handleProductSelectToggle(product.id, !!checked)}
+                    aria-label={`Select ${product.name}`}
+                  />
+                </div>
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 {product.inStock ? (
-                  <Badge className="absolute top-3 left-3 bg-green-600">In Stock</Badge>
+                  <Badge className="absolute top-3 left-12 bg-green-600">In Stock</Badge>
                 ) : (
-                  <Badge className="absolute top-3 left-3 bg-red-600">Out of Stock</Badge>
+                  <Badge className="absolute top-3 left-12 bg-red-600">Out of Stock</Badge>
                 )}
                 <Button
                   variant="ghost"
@@ -192,6 +278,15 @@ const Products = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.price}</span>
                   <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleOpenQuickView(product)}
+                      className="p-2 h-auto"
+                      title="Quick view"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Link to={`/products/${product.id}`}>
                       <Button variant="outline" size="sm">View</Button>
                     </Link>
@@ -199,7 +294,8 @@ const Products = () => {
                       size="sm" 
                       onClick={() => handleAddToCart(product)}
                       disabled={!product.inStock}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                      className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 p-2 h-auto"
+                      title="Add to cart"
                     >
                       <ShoppingCart className="h-4 w-4" />
                     </Button>
@@ -225,6 +321,14 @@ const Products = () => {
           </div>
         )}
       </div>
+      {selectedProductForQuickView && (
+        <ProductQuickViewModal
+          product={selectedProductForQuickView}
+          isOpen={isQuickViewModalOpen}
+          onOpenChange={setIsQuickViewModalOpen}
+          onAddToCart={handleAddToCart}
+        />
+      )}
     </div>
   );
 };

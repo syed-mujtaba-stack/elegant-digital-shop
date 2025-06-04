@@ -95,7 +95,7 @@ const ProductDetail = () => {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {product.images.map((image, index) => (
                 <button
                   key={index}
@@ -181,7 +181,7 @@ const ProductDetail = () => {
                   id="quantity"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
-                  className="border border-gray-300 rounded-md px-3 py-2 w-20"
+                  className="border border-gray-300 rounded-md px-3 py-2 w-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                 >
                   {[...Array(10)].map((_, i) => (
                     <option key={i + 1} value={i + 1}>
@@ -191,7 +191,7 @@ const ProductDetail = () => {
                 </select>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <Button
                   onClick={handleAddToCart}
                   disabled={!product.inStock}

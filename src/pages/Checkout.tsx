@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,22 +7,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { toast } from '@/hooks/use-toast';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { state, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser(); // Get user info for potential pre-fill
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
-    email: '',
+    email: '', // Will be pre-filled if user is logged in
     firstName: '',
     lastName: '',
     address: '',
     city: '',
     zipCode: '',
+    // User's name can be pre-filled from Clerk's user object
+    // email will be pre-filled from Clerk's user object if available
     cardNumber: '',
     expiryDate: '',
     cvv: ''
@@ -52,7 +55,32 @@ const Checkout = () => {
     navigate('/');
   };
 
-  if (state.items.length === 0) {
+  // Pre-fill email from Clerk user data when available and form data is empty
+  useEffect(() => {
+    if (isSignedIn && user && user.primaryEmailAddress && !formData.email) {
+      setFormData(prevData => ({
+        ...prevData,
+        email: user.primaryEmailAddress.emailAddress,
+        // Optionally pre-fill name if your form has it and Clerk user has it
+        // firstName: user.firstName || '',
+        // lastName: user.lastName || '',
+      }));
+    }
+  }, [isSignedIn, user, formData.email]);
+
+
+  if (!isLoaded) {
+    return <div className="min-h-screen flex items-center justify-center"><p>Loading checkout...</p></div>; // Or a spinner component
+  }
+
+  if (!isSignedIn) {
+    // Redirect to login, passing the current page as redirectUrl
+    // Clerk's <SignIn /> component can use this to return the user here after login.
+    navigate('/login?redirectUrl=/checkout'); 
+    return null;
+  }
+
+  if (state.items.length === 0 && isSignedIn) { // Ensure user is signed in before navigating from empty cart
     navigate('/cart');
     return null;
   }
@@ -91,7 +119,7 @@ const Checkout = () => {
                 <CardTitle>Shipping Address</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
@@ -165,7 +193,7 @@ const Checkout = () => {
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="expiryDate">Expiry Date</Label>
                     <Input
@@ -201,7 +229,7 @@ const Checkout = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {state.items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center">
+                  <div key={item.id} className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-center">
                     <div className="flex items-center gap-3">
                       <img
                         src={item.image}

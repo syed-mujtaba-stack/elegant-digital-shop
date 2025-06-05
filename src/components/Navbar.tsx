@@ -2,7 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, Heart, Menu, Sun, Moon } from 'lucide-react'; // Removed User icon as UserButton handles it
+import { ShoppingCart, Heart, Menu, Sun, Moon, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -14,9 +14,12 @@ const Navbar = () => {
   const { state: cartState } = useCart();
   const { state: wishlistState } = useWishlist();
   const { theme, toggleTheme } = useTheme();
-  // const { isSignedIn } = useAuth(); // We can use SignedIn/SignedOut components directly
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check if Clerk is available
+  const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const isClerkEnabled = !!PUBLISHABLE_KEY;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -119,20 +122,30 @@ const Navbar = () => {
               </Button>
             </Link>
 
-            {/* User Menu - Clerk Handled */}
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
+            {/* User Menu - Conditionally render based on Clerk availability */}
+            {isClerkEnabled ? (
+              <>
+                <SignedIn>
+                  <UserButton afterSignOutUrl="/" />
+                </SignedIn>
+                <SignedOut>
+                  <div className="flex items-center space-x-2">
+                    <Link to="/login">
+                      <Button variant="ghost" size="sm">Login</Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Register</Button>
+                    </Link>
+                  </div>
+                </SignedOut>
+              </>
+            ) : (
               <div className="flex items-center space-x-2">
-                <Link to="/login">
-                  <Button variant="ghost" size="sm">Login</Button>
-                </Link>
-                <Link to="/register">
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Register</Button>
-                </Link>
+                <Button variant="ghost" size="sm" className="p-2">
+                  <User className="h-5 w-5" />
+                </Button>
               </div>
-            </SignedOut>
+            )}
 
             {/* Mobile menu button */}
             <Button

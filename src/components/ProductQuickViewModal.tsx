@@ -10,7 +10,7 @@ interface ProductQuickViewModalProps {
   product: Product;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product, quantity?: number) => void;
 }
 
 export const ProductQuickViewModal = ({ 
@@ -21,6 +21,10 @@ export const ProductQuickViewModal = ({
 }: ProductQuickViewModalProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    onAddToCart(product, quantity);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -132,7 +136,7 @@ export const ProductQuickViewModal = ({
 
               <div className="flex gap-3">
                 <Button
-                  onClick={() => onAddToCart({...product, quantity})}
+                  onClick={handleAddToCart}
                   disabled={!product.inStock}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                 >

@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ShoppingCart, Star, Search, Heart, Eye } from 'lucide-react';
 import { products, categories, Product } from '@/data/products';
 import { ProductQuickViewModal } from '@/components/ProductQuickViewModal';
+import { ProductCardSkeleton } from '@/components/LoadingSkeleton';
+import StockIndicator from '@/components/StockIndicator';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { toast } from '@/hooks/use-toast';
@@ -19,6 +21,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+  const [isLoading, setIsLoading] = useState(false);
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -220,91 +223,90 @@ const Products = () => {
           )}
         </div>
 
-        {/* Results Count */}
-        <div className="mb-6">
-          <p className="text-gray-600 dark:text-gray-300">
-            Showing {filteredProducts.length} of {products.length} products
-          </p>
-        </div>
-
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-              <div className="relative overflow-hidden">
-                <div className="absolute top-3 left-3 z-10 bg-white/80 p-1 rounded-sm">
-                  <Checkbox 
-                    id={`select-${product.id}`}
-                    checked={selectedProductIds.has(product.id)}
-                    onCheckedChange={(checked) => handleProductSelectToggle(product.id, !!checked)}
-                    aria-label={`Select ${product.name}`}
-                  />
-                </div>
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {product.inStock ? (
-                  <Badge className="absolute top-3 left-12 bg-green-600">In Stock</Badge>
-                ) : (
-                  <Badge className="absolute top-3 left-12 bg-red-600">Out of Stock</Badge>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white"
-                  onClick={() => handleWishlistToggle(product)}
-                >
-                  <Heart 
-                    className={`h-4 w-4 ${
-                      isInWishlist(product.id) 
-                        ? 'text-red-500 fill-red-500' 
-                        : 'text-gray-600'
-                    }`} 
-                  />
-                </Button>
-              </div>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-1 mb-2">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm text-gray-600 dark:text-gray-300 ml-1">{product.rating}</span>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <div className="relative overflow-hidden">
+                  <div className="absolute top-3 left-3 z-10 bg-white/80 p-1 rounded-sm">
+                    <Checkbox 
+                      id={`select-${product.id}`}
+                      checked={selectedProductIds.has(product.id)}
+                      onCheckedChange={(checked) => handleProductSelectToggle(product.id, !!checked)}
+                      aria-label={`Select ${product.name}`}
+                    />
                   </div>
-                  <span className="text-sm text-gray-400">({product.reviews})</span>
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{product.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{product.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.price}</span>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleOpenQuickView(product)}
-                      className="p-2 h-auto"
-                      title="Quick view"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Link to={`/products/${product.id}`}>
-                      <Button variant="outline" size="sm">View</Button>
-                    </Link>
-                    <Button 
-                      size="sm" 
-                      onClick={() => handleAddToCart(product)}
-                      disabled={!product.inStock}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 p-2 h-auto"
-                      title="Add to cart"
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                    </Button>
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-3 right-3 z-10">
+                    <StockIndicator inStock={product.inStock} stockLevel={Math.floor(Math.random() * 10) + 1} showLevel />
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute bottom-3 right-3 p-2 bg-white/80 hover:bg-white"
+                    onClick={() => handleWishlistToggle(product)}
+                  >
+                    <Heart 
+                      className={`h-4 w-4 ${
+                        isInWishlist(product.id) 
+                          ? 'text-red-500 fill-red-500' 
+                          : 'text-gray-600'
+                      }`} 
+                    />
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-1 mb-2">
+                    <div className="flex items-center">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm text-gray-600 dark:text-gray-300 ml-1">{product.rating}</span>
+                    </div>
+                    <span className="text-sm text-gray-400">({product.reviews})</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{product.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{product.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-blue-600 dark:text-blue-400">${product.price}</span>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleOpenQuickView(product)}
+                        className="p-2 h-auto"
+                        title="Quick view"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Link to={`/products/${product.id}`}>
+                        <Button variant="outline" size="sm">View</Button>
+                      </Link>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleAddToCart(product)}
+                        disabled={!product.inStock}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 p-2 h-auto"
+                        title="Add to cart"
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* No Results */}
         {filteredProducts.length === 0 && (

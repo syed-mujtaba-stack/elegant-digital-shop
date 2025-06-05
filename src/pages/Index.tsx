@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import Newsletter from '@/components/Newsletter';
 import PromotionalBanner from '@/components/PromotionalBanner';
 import StockIndicator from '@/components/StockIndicator';
+import { RecentlyViewedProducts } from '@/components/RecentlyViewedProducts';
 
 const Index = () => {
   const { addItem } = useCart();
@@ -223,6 +224,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Recently Viewed Products */}
+      <RecentlyViewedProducts />
 
       {/* Features Section */}
       <section className="py-16">

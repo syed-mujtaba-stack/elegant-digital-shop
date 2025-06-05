@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, Star, ArrowLeft, Check, Heart } from 'lucide-react';
+import { ShoppingCart, Star, ArrowLeft, Check, Heart, GitCompare, ZoomIn } from 'lucide-react';
 import { products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useComparison } from '@/contexts/ComparisonContext';
+import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 import { toast } from '@/hooks/use-toast';
 import ProductReviews from '@/components/ProductReviews';
 
@@ -16,10 +18,19 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { addToComparison, isInComparison } = useComparison();
+  const { addToRecentlyViewed } = useRecentlyViewed();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const product = products.find(p => p.id === parseInt(id!));
+
+  useEffect(() => {
+    if (product) {
+      addToRecentlyViewed(product);
+    }
+  }, [product, addToRecentlyViewed]);
 
   if (!product) {
     return (
@@ -67,6 +78,21 @@ const ProductDetail = () => {
     }
   };
 
+  const handleComparisonToggle = () => {
+    if (isInComparison(product.id)) {
+      toast({
+        title: "Already in comparison",
+        description: "This product is already in your comparison list.",
+      });
+    } else {
+      addToComparison(product);
+      toast({
+        title: "Added to comparison!",
+        description: `${product.name} has been added to comparison.`,
+      });
+    }
+  };
+
   const handleBuyNow = () => {
     handleAddToCart();
     navigate('/cart');
@@ -88,12 +114,21 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover cursor-zoom-in"
+                onClick={() => setIsZoomed(!isZoomed)}
               />
+              <Button
+                variant="outline"
+                size="sm"
+                className="absolute top-4 right-4"
+                onClick={() => setIsZoomed(!isZoomed)}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {product.images.map((image, index) => (
@@ -209,6 +244,19 @@ const ProductDetail = () => {
                     className={`h-4 w-4 ${
                       isInWishlist(product.id) 
                         ? 'text-red-500 fill-red-500' 
+                        : 'text-gray-600'
+                    }`} 
+                  />
+                </Button>
+                <Button
+                  onClick={handleComparisonToggle}
+                  variant="outline"
+                  className="px-4"
+                >
+                  <GitCompare 
+                    className={`h-4 w-4 ${
+                      isInComparison(product.id) 
+                        ? 'text-purple-600' 
                         : 'text-gray-600'
                     }`} 
                   />

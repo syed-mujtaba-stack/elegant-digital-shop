@@ -8,6 +8,9 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ComparisonProvider } from "./contexts/ComparisonContext";
+import { RecentlyViewedProvider } from "./contexts/RecentlyViewedContext";
+import { CouponProvider } from "./contexts/CouponContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -33,32 +36,38 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const AppContent = () => {
   return (
     <ThemeProvider>
-      <WishlistProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <div className="min-h-screen flex flex-col w-full">
-            <Navbar />
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </CartProvider>
-      </WishlistProvider>
+      <CouponProvider>
+        <ComparisonProvider>
+          <RecentlyViewedProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <Toaster />
+                <Sonner />
+                <div className="min-h-screen flex flex-col w-full">
+                  <Navbar />
+                  <main className="flex-1">
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/products/:id" element={<ProductDetail />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/wishlist" element={<Wishlist />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                  <Footer />
+                </div>
+              </CartProvider>
+            </WishlistProvider>
+          </RecentlyViewedProvider>
+        </ComparisonProvider>
+      </CouponProvider>
     </ThemeProvider>
   );
 };

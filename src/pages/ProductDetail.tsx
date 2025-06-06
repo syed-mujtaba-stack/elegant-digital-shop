@@ -34,10 +34,10 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
-          <Button onClick={() => navigate('/products')}>Back to Products</Button>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Product not found</h1>
+          <Button onClick={() => navigate('/products')} className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200">Back to Products</Button>
         </div>
       </div>
     );
@@ -99,13 +99,13 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate('/products')}
-          className="mb-6"
+          className="mb-6 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Products
@@ -114,17 +114,17 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
               <img
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover cursor-zoom-in"
+                className="w-full h-full object-cover cursor-zoom-in filter grayscale"
                 onClick={() => setIsZoomed(!isZoomed)}
               />
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-4 right-4"
+                className="absolute top-4 right-4 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
                 onClick={() => setIsZoomed(!isZoomed)}
               >
                 <ZoomIn className="h-4 w-4" />
@@ -136,13 +136,13 @@ const ProductDetail = () => {
                   key={index}
                   onClick={() => setSelectedImage(index)}
                   className={`aspect-square rounded-lg overflow-hidden ${
-                    selectedImage === index ? 'ring-2 ring-blue-600' : ''
+                    selectedImage === index ? 'ring-2 ring-black dark:ring-white' : ''
                   }`}
                 >
                   <img
                     src={image}
                     alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover filter grayscale"
                   />
                 </button>
               ))}
@@ -153,11 +153,11 @@ const ProductDetail = () => {
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary">{product.category}</Badge>
+                <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white">{product.category}</Badge>
                 {product.inStock ? (
-                  <Badge className="bg-green-600">In Stock</Badge>
+                  <Badge className="bg-black dark:bg-white text-white dark:text-black">In Stock</Badge>
                 ) : (
-                  <Badge variant="destructive">Out of Stock</Badge>
+                  <Badge variant="destructive" className="bg-gray-600 text-white">Out of Stock</Badge>
                 )}
               </div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{product.name}</h1>
@@ -170,53 +170,53 @@ const ProductDetail = () => {
                       key={i}
                       className={`h-5 w-5 ${
                         i < Math.floor(product.rating)
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-gray-300'
+                          ? 'text-black dark:text-white fill-black dark:fill-white'
+                          : 'text-gray-300 dark:text-gray-600'
                       }`}
                     />
                   ))}
                 </div>
-                <span className="text-lg font-medium">{product.rating}</span>
-                <span className="text-gray-500">({product.reviews} reviews)</span>
+                <span className="text-lg font-medium text-black dark:text-white">{product.rating}</span>
+                <span className="text-gray-500 dark:text-gray-400">({product.reviews} reviews)</span>
               </div>
 
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-6">${product.price}</p>
+              <p className="text-3xl font-bold text-black dark:text-white mb-6">${product.price}</p>
             </div>
 
-            <Separator />
+            <Separator className="bg-gray-200 dark:bg-gray-700" />
 
             {/* Description */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Description</h3>
-              <p className="text-gray-600 leading-relaxed">{product.description}</p>
+              <h3 className="text-lg font-semibold mb-3 text-black dark:text-white">Description</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{product.description}</p>
             </div>
 
             {/* Features */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Features</h3>
+              <h3 className="text-lg font-semibold mb-3 text-black dark:text-white">Features</h3>
               <ul className="space-y-2">
                 {product.features.map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
-                    <Check className="h-4 w-4 text-green-600" />
-                    <span className="text-gray-600">{feature}</span>
+                    <Check className="h-4 w-4 text-black dark:text-white" />
+                    <span className="text-gray-600 dark:text-gray-400">{feature}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <Separator />
+            <Separator className="bg-gray-200 dark:bg-gray-700" />
 
             {/* Quantity and Actions */}
             <div className="space-y-4">
               <div>
-                <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Quantity
                 </label>
                 <select
                   id="quantity"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
-                  className="border border-gray-300 rounded-md px-3 py-2 w-24 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 w-24 dark:bg-gray-800 dark:text-white bg-white"
                 >
                   {[...Array(10)].map((_, i) => (
                     <option key={i + 1} value={i + 1}>
@@ -230,7 +230,7 @@ const ProductDetail = () => {
                 <Button
                   onClick={handleAddToCart}
                   disabled={!product.inStock}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart
@@ -238,26 +238,26 @@ const ProductDetail = () => {
                 <Button
                   onClick={handleWishlistToggle}
                   variant="outline"
-                  className="px-4"
+                  className="px-4 border-gray-300 dark:border-gray-600"
                 >
                   <Heart 
                     className={`h-4 w-4 ${
                       isInWishlist(product.id) 
-                        ? 'text-red-500 fill-red-500' 
-                        : 'text-gray-600'
+                        ? 'text-black dark:text-white fill-black dark:fill-white' 
+                        : 'text-gray-600 dark:text-gray-400'
                     }`} 
                   />
                 </Button>
                 <Button
                   onClick={handleComparisonToggle}
                   variant="outline"
-                  className="px-4"
+                  className="px-4 border-gray-300 dark:border-gray-600"
                 >
                   <GitCompare 
                     className={`h-4 w-4 ${
                       isInComparison(product.id) 
-                        ? 'text-purple-600' 
-                        : 'text-gray-600'
+                        ? 'text-black dark:text-white' 
+                        : 'text-gray-600 dark:text-gray-400'
                     }`} 
                   />
                 </Button>
@@ -265,7 +265,7 @@ const ProductDetail = () => {
                   onClick={handleBuyNow}
                   disabled={!product.inStock}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 border-gray-300 dark:border-gray-600"
                 >
                   Buy Now
                 </Button>
@@ -281,28 +281,28 @@ const ProductDetail = () => {
 
         {/* Related Products */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Products</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Related Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products
               .filter(p => p.category === product.category && p.id !== product.id)
               .slice(0, 4)
               .map((relatedProduct) => (
-                <Card key={relatedProduct.id} className="group hover:shadow-lg transition-shadow">
+                <Card key={relatedProduct.id} className="group hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                   <div className="aspect-square overflow-hidden rounded-t-lg">
                     <img
                       src={relatedProduct.image}
                       alt={relatedProduct.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 filter grayscale"
                     />
                   </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                       {relatedProduct.name}
                     </h3>
-                    <p className="text-lg font-bold text-blue-600">${relatedProduct.price}</p>
+                    <p className="text-lg font-bold text-black dark:text-white">${relatedProduct.price}</p>
                     <Button
                       size="sm"
-                      className="w-full mt-3"
+                      className="w-full mt-3 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
                       onClick={() => navigate(`/products/${relatedProduct.id}`)}
                     >
                       View Details

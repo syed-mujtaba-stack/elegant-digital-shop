@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import { RecentlyViewedProvider } from "./contexts/RecentlyViewedContext";
 import { CouponProvider } from "./contexts/CouponContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import Chatbot from "./components/Chatbot";
 
 // Pages
 import Index from "./pages/Index";
@@ -72,6 +72,7 @@ const AppContent = () => {
                     </Routes>
                   </main>
                   <Footer />
+                  <Chatbot />
                 </div>
               </CartProvider>
             </WishlistProvider>

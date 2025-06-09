@@ -1,3 +1,4 @@
+
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCoupon } from '@/contexts/CouponContext';
@@ -13,10 +14,15 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 const EnhancedCart = () => {
-  const { cart, addItem, removeItem, clearCart, getTotal } = useCart();
-  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
-  const { discount, applyCoupon, removeCoupon } = useCoupon();
+  const { state: cartState, addItem, removeItem, clearCart } = useCart();
+  const { state: wishlistState, addToWishlist, removeFromWishlist } = useWishlist();
+  const { calculateDiscount, applyCoupon } = useCoupon();
   const navigate = useNavigate();
+
+  const cart = cartState.items;
+  const wishlist = wishlistState.items;
+  const subtotal = cartState.total;
+  const discount = calculateDiscount(subtotal);
 
   const handleIncrement = (item: any) => {
     addItem({ ...item, quantity: 1 });
@@ -24,12 +30,14 @@ const EnhancedCart = () => {
 
   const handleDecrement = (item: any) => {
     if (item.quantity > 1) {
-      removeItem({ ...item, quantity: -1 });
+      const newItem = { ...item, quantity: item.quantity - 1 };
+      removeItem(item.id);
+      addItem(newItem);
     }
   };
 
   const handleRemoveFromCart = (item: any) => {
-    removeItem(item);
+    removeItem(item.id);
   };
 
   const handleMoveToWishlist = (item: any) => {
@@ -45,12 +53,11 @@ const EnhancedCart = () => {
     removeFromWishlist(item.id);
   };
 
-  const subtotal = getTotal();
   const shippingCost = subtotal > 50 ? 0 : 10;
   const total = subtotal - discount + shippingCost;
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen">
+    <div className="bg-background min-h-screen">
       <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <Card className="shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 pl-4 pr-4">
@@ -60,8 +67,8 @@ const EnhancedCart = () => {
           <CardContent className="p-4">
             {cart.length === 0 ? (
               <div className="text-center py-8">
-                <ShoppingCart className="mx-auto h-10 w-10 text-gray-400 dark:text-gray-600 mb-2" />
-                <p className="text-gray-500 dark:text-gray-400">Your cart is empty.</p>
+                <ShoppingCart className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                <p className="text-muted-foreground">Your cart is empty.</p>
                 <Button onClick={() => navigate('/products')} className="mt-4">
                   Continue Shopping
                 </Button>
@@ -70,18 +77,18 @@ const EnhancedCart = () => {
               <>
                 <ul className="space-y-4">
                   {cart.map((item) => (
-                    <li key={item.id} className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+                    <li key={item.id} className="flex items-center justify-between py-3 border-b border-border">
                       <div className="flex items-center">
                         <div className="w-20 h-20 mr-4">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-md" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-800 dark:text-white">{item.name}</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Price: ${item.price}</p>
+                          <h3 className="font-semibold text-foreground">{item.name}</h3>
+                          <p className="text-sm text-muted-foreground">Price: ${item.price}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <div className="flex items-center border border-gray-300 dark:border-gray-700 rounded-md">
+                        <div className="flex items-center border border-border rounded-md">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -90,7 +97,7 @@ const EnhancedCart = () => {
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
-                          <span className="px-2 text-gray-700 dark:text-gray-300">{item.quantity}</span>
+                          <span className="px-2 text-foreground">{item.quantity}</span>
                           <Button variant="ghost" size="icon" onClick={() => handleIncrement(item)}>
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -99,7 +106,7 @@ const EnhancedCart = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => handleRemoveFromCart(item)}
-                          className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-gray-800"
+                          className="text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -107,7 +114,7 @@ const EnhancedCart = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => handleMoveToWishlist(item)}
-                          className="text-blue-500 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-gray-800"
+                          className="text-primary hover:bg-primary/10"
                         >
                           <Heart className="h-4 w-4" />
                         </Button>
@@ -119,11 +126,10 @@ const EnhancedCart = () => {
                 <Separator className="my-6" />
 
                 <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                  <CouponInput />
+                  <CouponInput cartTotal={subtotal} />
                   <Button
                     onClick={clearCart}
                     variant="destructive"
-                    className="bg-red-500 hover:bg-red-600 text-white"
                   >
                     Clear Cart
                   </Button>
@@ -133,31 +139,31 @@ const EnhancedCart = () => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700 dark:text-gray-300">Subtotal:</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">${subtotal.toFixed(2)}</span>
+                    <span className="text-foreground">Subtotal:</span>
+                    <span className="font-semibold text-foreground">${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700 dark:text-gray-300">Shipping:</span>
-                    <span className="font-semibold text-gray-900 dark:text-white">
+                    <span className="text-foreground">Shipping:</span>
+                    <span className="font-semibold text-foreground">
                       {shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}
                     </span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-700 dark:text-gray-300">Discount:</span>
+                      <span className="text-foreground">Discount:</span>
                       <span className="font-semibold text-green-500">- ${discount.toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-700 dark:text-gray-300 font-bold">Total:</span>
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">${total.toFixed(2)}</span>
+                    <span className="text-foreground font-bold">Total:</span>
+                    <span className="text-xl font-bold text-foreground">${total.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <Separator className="my-6" />
 
                 <div className="flex justify-end">
-                  <Button onClick={() => navigate('/checkout')} className="bg-blue-500 hover:bg-blue-600 text-white">
+                  <Button onClick={() => navigate('/checkout')} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                     Proceed to Checkout <ArrowRight className="ml-2" />
                   </Button>
                 </div>
@@ -175,22 +181,22 @@ const EnhancedCart = () => {
             <CardContent className="p-4">
               <ul className="space-y-4">
                 {wishlist.map((item) => (
-                  <li key={item.id} className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
+                  <li key={item.id} className="flex items-center justify-between py-3 border-b border-border">
                     <div className="flex items-center">
                       <div className="w-20 h-20 mr-4">
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-md" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-800 dark:text-white">{item.name}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Price: ${item.price}</p>
+                        <h3 className="font-semibold text-foreground">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground">Price: ${item.price}</p>
                       </div>
                     </div>
                     <div>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleRemoveFromWishlist(item.id)}
-                        className="text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-gray-800"
+                        onClick={() => handleRemoveFromWishlist(item)}
+                        className="text-destructive hover:bg-destructive/10"
                       >
                         Remove
                       </Button>

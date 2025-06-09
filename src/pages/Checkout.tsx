@@ -13,19 +13,26 @@ import { toast } from '@/hooks/use-toast';
 const Checkout = () => {
   const navigate = useNavigate();
   const { state, clearCart } = useCart();
-  const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser(); // Get user info for potential pre-fill
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Check if Clerk is available
+  const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const isClerkEnabled = !!PUBLISHABLE_KEY;
+
+  // Conditionally use Clerk hooks
+  const authResult = isClerkEnabled ? useAuth() : { isSignedIn: false, isLoaded: true };
+  const userResult = isClerkEnabled ? useUser() : { user: null };
+  
+  const { isSignedIn, isLoaded } = authResult;
+  const { user } = userResult;
+
   const [formData, setFormData] = useState({
-    email: '', // Will be pre-filled if user is logged in
+    email: '',
     firstName: '',
     lastName: '',
     address: '',
     city: '',
     zipCode: '',
-    // User's name can be pre-filled from Clerk's user object
-    // email will be pre-filled from Clerk's user object if available
     cardNumber: '',
     expiryDate: '',
     cvv: ''
@@ -57,30 +64,25 @@ const Checkout = () => {
 
   // Pre-fill email from Clerk user data when available and form data is empty
   useEffect(() => {
-    if (isSignedIn && user && user.primaryEmailAddress && !formData.email) {
+    if (isClerkEnabled && isSignedIn && user && user.primaryEmailAddress && !formData.email) {
       setFormData(prevData => ({
         ...prevData,
         email: user.primaryEmailAddress.emailAddress,
-        // Optionally pre-fill name if your form has it and Clerk user has it
-        // firstName: user.firstName || '',
-        // lastName: user.lastName || '',
       }));
     }
-  }, [isSignedIn, user, formData.email]);
-
+  }, [isClerkEnabled, isSignedIn, user, formData.email]);
 
   if (!isLoaded) {
-    return <div className="min-h-screen flex items-center justify-center"><p>Loading checkout...</p></div>; // Or a spinner component
+    return <div className="min-h-screen flex items-center justify-center"><p>Loading checkout...</p></div>;
   }
 
-  if (!isSignedIn) {
-    // Redirect to login, passing the current page as redirectUrl
-    // Clerk's <SignIn /> component can use this to return the user here after login.
+  // If Clerk is enabled but user is not signed in, redirect to login
+  if (isClerkEnabled && !isSignedIn) {
     navigate('/login?redirectUrl=/checkout'); 
     return null;
   }
 
-  if (state.items.length === 0 && isSignedIn) { // Ensure user is signed in before navigating from empty cart
+  if (state.items.length === 0) {
     navigate('/cart');
     return null;
   }

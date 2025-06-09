@@ -65,6 +65,16 @@ const Navbar = () => {
                 Products
               </Link>
               <Link
+                to="/dashboard"
+                className={`text-sm font-medium transition-colors ${
+                  isActive('/dashboard') 
+                    ? 'text-blue-600 dark:text-blue-400' 
+                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                }`}
+              >
+                Dashboard
+              </Link>
+              <Link
                 to="/about"
                 className={`text-sm font-medium transition-colors ${
                   isActive('/about') 
@@ -207,6 +217,17 @@ const Navbar = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Products
+              </Link>
+              <Link
+                to="/dashboard"
+                className={`block px-3 py-2 text-sm font-medium rounded-md ${
+                  isActive('/dashboard') 
+                    ? 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/20' 
+                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Dashboard
               </Link>
               <Link
                 to="/about"

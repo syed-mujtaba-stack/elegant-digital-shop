@@ -19,6 +19,7 @@ import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import EnhancedCart from "./pages/EnhancedCart";
 import Checkout from "./pages/Checkout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -26,6 +27,7 @@ import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Wishlist from "./pages/Wishlist";
+import Dashboard from "./pages/Dashboard";
 import CustomerService from "./pages/CustomerService";
 import ShippingInfo from "./pages/ShippingInfo";
 import Returns from "./pages/Returns";
@@ -55,7 +57,7 @@ const AppContent = () => {
                       <Route path="/" element={<Index />} />
                       <Route path="/products" element={<Products />} />
                       <Route path="/products/:id" element={<ProductDetail />} />
-                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/cart" element={<EnhancedCart />} />
                       <Route path="/checkout" element={<Checkout />} />
                       <Route path="/login" element={<Login />} />
                       <Route path="/register" element={<Register />} />
@@ -63,6 +65,7 @@ const AppContent = () => {
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/wishlist" element={<Wishlist />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/customer-service" element={<CustomerService />} />
                       <Route path="/shipping-info" element={<ShippingInfo />} />
                       <Route path="/returns" element={<Returns />} />

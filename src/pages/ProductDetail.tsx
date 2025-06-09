@@ -12,6 +12,8 @@ import { useComparison } from '@/contexts/ComparisonContext';
 import { useRecentlyViewed } from '@/contexts/RecentlyViewedContext';
 import { toast } from '@/hooks/use-toast';
 import ProductReviews from '@/components/ProductReviews';
+import { SocialSharing } from '@/components/SocialSharing';
+import { ProductRecommendations } from '@/components/ProductRecommendations';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -271,6 +273,16 @@ const ProductDetail = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Social Sharing */}
+            <div className="pt-4 border-t">
+              <SocialSharing 
+                url={window.location.href}
+                title={product.name}
+                description={product.description}
+                image={product.image}
+              />
+            </div>
           </div>
         </div>
 
@@ -279,39 +291,8 @@ const ProductDetail = () => {
           <ProductReviews productId={product.id} />
         </div>
 
-        {/* Related Products */}
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products
-              .filter(p => p.category === product.category && p.id !== product.id)
-              .slice(0, 4)
-              .map((relatedProduct) => (
-                <Card key={relatedProduct.id} className="group hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                  <div className="aspect-square overflow-hidden rounded-t-lg">
-                    <img
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 filter grayscale"
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                      {relatedProduct.name}
-                    </h3>
-                    <p className="text-lg font-bold text-black dark:text-white">${relatedProduct.price}</p>
-                    <Button
-                      size="sm"
-                      className="w-full mt-3 bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
-                      onClick={() => navigate(`/products/${relatedProduct.id}`)}
-                    >
-                      View Details
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-          </div>
-        </div>
+        {/* Product Recommendations */}
+        <ProductRecommendations currentProductId={product.id} limit={4} />
       </div>
     </div>
   );

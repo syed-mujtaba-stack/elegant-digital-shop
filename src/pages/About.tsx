@@ -85,7 +85,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Mission Section */}
+      {/* Our Mission Section */}
       <section className="py-16 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -119,7 +119,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Values Section */}
+      {/* Our Values Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -142,7 +142,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Our Team Section */}
       <section className="py-16 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -170,7 +170,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Timeline Section */}
+      {/* Our Timeline Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

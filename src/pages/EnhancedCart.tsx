@@ -8,15 +8,15 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Minus, Plus, Trash2, Heart, ShoppingCart, ArrowRight } from 'lucide-react';
 import { CouponInput } from '@/components/CouponInput';
-import { BulkDiscountCalculator } from '@/components/BulkDiscountCalculator';
-import { SaveForLater } from '@/components/SaveForLater';
+import { BulkCartActions } from '@/components/BulkCartActions';
+import { StockLevelIndicator } from '@/components/StockLevelIndicator';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
 const EnhancedCart = () => {
   const { state: cartState, addItem, removeItem, clearCart } = useCart();
   const { state: wishlistState, addToWishlist, removeFromWishlist } = useWishlist();
-  const { calculateDiscount, applyCoupon } = useCoupon();
+  const { calculateDiscount } = useCoupon();
   const navigate = useNavigate();
 
   const cart = cartState.items;
@@ -49,6 +49,17 @@ const EnhancedCart = () => {
     });
   };
 
+  const handleBulkRemove = (itemIds: number[]) => {
+    itemIds.forEach(id => removeItem(id));
+  };
+
+  const handleBulkMoveToWishlist = (items: any[]) => {
+    items.forEach(item => {
+      addToWishlist(item);
+      removeItem(item.id);
+    });
+  };
+
   const handleRemoveFromWishlist = (item: any) => {
     removeFromWishlist(item.id);
   };
@@ -75,16 +86,29 @@ const EnhancedCart = () => {
               </div>
             ) : (
               <>
+                {/* Bulk Actions */}
+                <BulkCartActions 
+                  items={cart}
+                  onBulkRemove={handleBulkRemove}
+                  onBulkMoveToWishlist={handleBulkMoveToWishlist}
+                />
+
                 <ul className="space-y-4">
                   {cart.map((item) => (
                     <li key={item.id} className="flex items-center justify-between py-3 border-b border-border">
-                      <div className="flex items-center">
+                      <div className="flex items-center flex-1">
                         <div className="w-20 h-20 mr-4">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-md" />
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <h3 className="font-semibold text-foreground">{item.name}</h3>
                           <p className="text-sm text-muted-foreground">Price: ${item.price}</p>
+                          <div className="mt-2">
+                            <StockLevelIndicator 
+                              currentStock={Math.floor(Math.random() * 50) + 5}
+                              size="sm"
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
